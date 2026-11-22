@@ -25,7 +25,8 @@ xcodebuild -project Sumi.xcodeproj -scheme Sumi -configuration Release -derivedD
 APP="$OUT/dd/Build/Products/Release/Sumi.app"
 [ "$(/usr/libexec/PlistBuddy -c 'Print :CFBundleShortVersionString' "$APP/Contents/Info.plist")" = "$VERSION" ]
 codesign --verify --deep --strict "$APP"
-if grep -rq "$HOME" "$APP"; then echo "The build contains your home folder path."; exit 1; fi
+LEAKS=$(grep -rl "$HOME" "$APP" || true)
+if [ -n "$LEAKS" ]; then echo "The build contains your home folder path in:"; echo "$LEAKS"; exit 1; fi
 
 mkdir "$OUT/feed"
 ZIP="Sumi-$VERSION.zip"
