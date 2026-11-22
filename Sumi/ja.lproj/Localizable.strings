@@ -33,6 +33,8 @@
 "Replace Note" = "ノートを置き換え";
 "New Note" = "新規ノート";
 "Quick Note" = "クイックノート";
+"New Quick Note" = "新規クイックノート";
+"New Quick Note (⌘N)" = "新規クイックノート (⌘N)";
 "New Notebook" = "新規ノートブック";
 "New Notebook…" = "新規ノートブック…";
 "Choose a Template" = "テンプレートを選ぶ";

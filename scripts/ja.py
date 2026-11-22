@@ -20,7 +20,7 @@ T = {
 "Copy": "コピー", "Set as Title": "タイトルにする", "Add Tags": "タグを追加", "Insert Below": "下に挿入",
 "Replace Selection": "選択範囲を置き換え", "Replace Note": "ノートを置き換え",
 # Commands
-"New Note": "新規ノート", "Quick Note": "クイックノート", "New Notebook": "新規ノートブック", "New Notebook…": "新規ノートブック…",
+"New Note": "新規ノート", "Quick Note": "クイックノート", "New Quick Note": "新規クイックノート", "New Quick Note (⌘N)": "新規クイックノート (⌘N)", "New Notebook": "新規ノートブック", "New Notebook…": "新規ノートブック…",
 "Choose a Template": "テンプレートを選ぶ", "Choose a Template…": "テンプレートを選ぶ…",
 "Toggle Preview": "プレビューを切り替え", "Toggle Side by Side": "左右分割を切り替え",
 "Toggle Distraction Free": "集中モードを切り替え", "Toggle Sidebar": "サイドバーを切り替え",

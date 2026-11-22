@@ -155,6 +155,12 @@ struct QuickNoteView: View {
                     .modifier(ThemedPane(part: .editor))
                     .modifier(NoteWindowChrome(app: app))
                     .environment(app)
+                    .toolbar {
+                        ToolbarItem(placement: .navigation) {
+                            Button { app.quickNote(new: true) } label: { Image(systemName: "square.and.pencil") }
+                                .help("New Quick Note (⌘N)")
+                        }
+                    }
             } else {
                 Color.clear
             }
@@ -163,9 +169,15 @@ struct QuickNoteView: View {
             guard app == nil else { return }
             let state = AppState(store: store)
             state.selectedNoteID = noteID
+            state.isQuickNote = true
             state.openQuickNoteWindow = { id in openWindow(id: "quick", value: id) }
             app = state
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) { state.titleFocusRequest += 1 }
+            // A fresh note starts at its title; a note that is continued starts in the text.
+            let note = noteID.flatMap { store.notes[$0] }
+            let fresh = note.map { $0.title.isEmpty && $0.body.isEmpty } ?? true
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                if fresh { state.titleFocusRequest += 1 } else { state.editor.focus() }
+            }
         }
     }
 }

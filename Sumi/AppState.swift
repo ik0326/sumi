@@ -103,6 +103,8 @@ final class AppState {
 
     @ObservationIgnored let editor = EditorController()
     @ObservationIgnored var openQuickNoteWindow: ((String) -> Void)?
+    /// True for the state of a Quick Note window.
+    @ObservationIgnored var isQuickNote = false
     @ObservationIgnored private var back: [String] = []
     @ObservationIgnored private var forward: [String] = []
     @ObservationIgnored private var navigating = false
@@ -117,6 +119,7 @@ final class AppState {
     static let commands: [AppCommand] = [
         .init(id: "core:new-note", title: "New Note", keys: "⌘N"),
         .init(id: "application:quick-note", title: "Quick Note"),
+        .init(id: "application:new-quick-note", title: "New Quick Note"),
         .init(id: "core:new-notebook", title: "New Notebook", keys: "⌘⇧N"),
         .init(id: "core:choose-template", title: "Choose a Template", keys: "⌘T"),
         .init(id: "view:toggle-preview", title: "Toggle Preview", keys: "⌘E"),
@@ -192,7 +195,7 @@ final class AppState {
 
     /// Commands that act on the library; they do nothing in a window that edits a file in place.
     private static let libraryOnly: Set<String> = [
-        "core:new-note", "application:quick-note", "core:new-notebook", "core:choose-template", "core:delete-note",
+        "core:new-note", "application:quick-note", "application:new-quick-note", "core:new-notebook", "core:choose-template", "core:delete-note",
         "core:duplicate-note", "core:pin-note-to-top", "editor:focus-tags", "editor:focus-title", "core:telescope-tags",
         "core:telescope-notebooks", "core:show-editor-action-menu", "core:show-revisions", "core:navigate-back",
         "core:navigate-forward", "core:open-next-note", "core:open-prev-note", "core:sidebar-focus",
@@ -211,8 +214,9 @@ final class AppState {
         }
         switch id {
         case "ai:menu": if selectedNote != nil { showTelescope(.ai) }
-        case "core:new-note": newNote()
+        case "core:new-note": if isQuickNote { quickNote(new: true) } else { newNote() }
         case "application:quick-note": quickNote()
+        case "application:new-quick-note": quickNote(new: true)
         case "core:new-notebook": newBookRequest += 1
         case "core:choose-template": chooseTemplate()
         case "view:toggle-preview": viewMode = viewMode == .preview ? .edit : .preview
@@ -315,12 +319,17 @@ final class AppState {
         titleFocusRequest += 1
     }
 
-    /// Creates a note and shows it in its own window.
-    func quickNote() {
-        let inbox = store.books.first { $0.parentId == nil && $0.name == "Inbox" }?.id
-        let id = store.createNote(bookId: inbox)
+    /// Shows the quick note in its own window: the one used last time, or a new one when there is none.
+    func quickNote(new: Bool = false) {
+        let key = "quickNoteID"
+        var id = UserDefaults.standard.string(forKey: key)
+        if new || id.flatMap({ store.notes[$0] }).map({ $0.trashed }) ?? true {
+            let inbox = store.books.first { $0.parentId == nil && $0.name == "Inbox" }?.id
+            id = store.createNote(bookId: inbox)
+            UserDefaults.standard.set(id, forKey: key)
+        }
         NSApp.activate(ignoringOtherApps: true)
-        openQuickNoteWindow?(id)
+        if let id { openQuickNoteWindow?(id) }
     }
 
     func select(_ id: String?) {
