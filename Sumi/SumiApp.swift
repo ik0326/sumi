@@ -96,6 +96,7 @@ struct ContentView: View {
             FileOpener.shared.handler = { url in openWindow(id: "file", value: url) }
             registerHotkey()
             applyTheme()
+            Updater.shared.start()
             Customization.shared.start { [app] id in (AppState.focused ?? app).run(id) }
         }
         .onChange(of: appTheme) { applyTheme() }
@@ -179,6 +180,7 @@ struct AppCommands: Commands {
 
     var body: some Commands {
         CommandGroup(after: .appInfo) {
+            Button("Check for Updates…") { Task { await Updater.shared.checkFromMenu() } }
             Button("Acknowledgements") {
                 if let url = Bundle.main.resourceURL?.appendingPathComponent("editor/THIRD_PARTY_NOTICES.txt") {
                     NSWorkspace.shared.open(url)

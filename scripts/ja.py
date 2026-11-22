@@ -161,6 +161,21 @@ The on-device model reads about the first %d characters of long text.''':
 "Open File…": "ファイルを開く…", "Markdown File": "Markdown ファイル", "Show in Finder": "Finder に表示",
 "This file could not be opened": "このファイルは開けませんでした",
 "Sumi opens text files saved as UTF-8.": "Sumi で開けるのは、UTF-8 で保存されたテキストファイルです。",
+# Updates
+"A new version is available": "最新のバージョンがあります", "Version %@ — click to update": "バージョン %@ — クリックでアップデート",
+"Downloading…": "ダウンロード中…", "Installing…": "インストール中…", "Check for Updates…": "アップデートを確認…",
+"Sumi %@ is available. You have %@.": "Sumi %@ が利用できます。現在のバージョンは %@ です。",
+"Update Now": "今すぐアップデート", "Later": "あとで", "Could not check for updates": "アップデートを確認できませんでした",
+"Sumi is up to date": "Sumi は最新です", "Version %@ is the latest version.": "バージョン %@ が最新です。",
+"Updates": "アップデート", "Check for updates automatically": "アップデートを自動で確認", "Version %@": "バージョン %@",
+"Check Now": "今すぐ確認",
+"Sumi asks GitHub once a day whether a newer release exists. Nothing about you or your notes is sent.":
+    "1 日に 1 回、新しいリリースがあるかを GitHub に問い合わせます。あなたやノートに関する情報は送りません。",
+"Sumi cannot update itself from this location. Move it to the Applications folder, or download the new version.":
+    "この場所からは自動でアップデートできません。Sumi を「アプリケーション」フォルダに移動するか、新しいバージョンをダウンロードしてください。",
+"The download did not match the published checksum.": "ダウンロードしたファイルが、公開されているチェックサムと一致しませんでした。",
+"The download is not a valid copy of Sumi.": "ダウンロードしたファイルが正しい Sumi ではありません。",
+"The update could not be installed.": "アップデートをインストールできませんでした。",
 # Tag bar
 "Create “%@”": "「%@」を作成", "Remove tag": "タグを外す", "Show Notes with This Tag": "このタグのノートを表示",
 "Remove from Note": "ノートから外す",

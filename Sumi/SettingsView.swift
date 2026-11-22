@@ -15,6 +15,7 @@ struct SettingsView: View {
     ]
 
     @AppStorage("appLanguage") private var appLanguage = "system"
+    @AppStorage("autoUpdateCheck") private var autoUpdateCheck = true
     @State private var languageChanged = false
     @AppStorage("vimEnabled") private var vimEnabled = false
     @AppStorage("lineNumbers") private var lineNumbers = false
@@ -75,6 +76,16 @@ struct SettingsView: View {
                         Button("Relaunch Now") { AppLanguage.relaunch() }
                     }
                 }
+            }
+            Section("Updates") {
+                Toggle("Check for updates automatically", isOn: $autoUpdateCheck)
+                HStack {
+                    Text(String(format: L("Version %@"), Updater.currentVersion)).foregroundStyle(.secondary)
+                    Spacer()
+                    Button("Check Now") { Task { await Updater.shared.checkFromMenu() } }
+                        .disabled(Updater.shared.busy)
+                }
+                hint("Sumi asks GitHub once a day whether a newer release exists. Nothing about you or your notes is sent.")
             }
             Section("Sync") {
                 Toggle("Sync with iCloud Drive", isOn: Binding(

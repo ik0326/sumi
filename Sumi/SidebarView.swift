@@ -158,6 +158,8 @@ struct SidebarView: View {
         }
         .listStyle(.sidebar)
         .safeAreaInset(edge: .bottom) {
+          VStack(spacing: 0) {
+            UpdateBanner()
             if store.usingICloud {
                 HStack(spacing: 5) {
                     Image(systemName: "icloud")
@@ -169,6 +171,7 @@ struct SidebarView: View {
                 .padding(.horizontal, 14)
                 .padding(.vertical, 6)
             }
+          }
         }
         .focused($focused)
         .onKeyPress(phases: [.down, .repeat]) { press in
