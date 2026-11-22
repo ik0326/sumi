@@ -24,7 +24,11 @@ xcodebuild -project Sumi.xcodeproj -scheme Sumi -configuration Release -derivedD
   ARCHS="arm64 x86_64" ONLY_ACTIVE_ARCH=NO build | grep -E " error|BUILD " || true
 APP="$OUT/dd/Build/Products/Release/Sumi.app"
 [ "$(/usr/libexec/PlistBuddy -c 'Print :CFBundleShortVersionString' "$APP/Contents/Info.plist")" = "$VERSION" ]
+# Debug symbols can carry the build machine's paths: remove them, then sign again.
+strip -S -x "$APP/Contents/MacOS/Sumi" 2>/dev/null
+codesign --force --sign - --preserve-metadata=entitlements,flags "$APP"
 codesign --verify --deep --strict "$APP"
+[ "$(lipo -archs "$APP/Contents/MacOS/Sumi" | tr ' ' '\n' | sort | tr '\n' ' ')" = "arm64 x86_64 " ]
 LEAKS=$(grep -rl "$HOME" "$APP" || true)
 if [ -n "$LEAKS" ]; then
   echo "The build contains your home folder path in:"; echo "$LEAKS"
