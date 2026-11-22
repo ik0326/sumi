@@ -4,7 +4,8 @@
   "version": "0.1.0",
   "scripts": {
     "build": "esbuild src/main.js --bundle --minify --format=iife --target=safari17 --loader:.woff2=dataurl --loader:.woff=empty --loader:.ttf=empty --outfile=../Sumi/Resources/editor/editor.js && cp node_modules/mermaid/dist/mermaid.min.js ../Sumi/Resources/editor/mermaid.min.js",
-    "notices": "python3 scripts/notices.py"
+    "notices": "python3 scripts/notices.py",
+    "themes": "python3 scripts/themes.py"
   },
   "dependencies": {
     "@codemirror/autocomplete": "^6.20.4",

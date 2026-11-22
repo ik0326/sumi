@@ -10,6 +10,8 @@ struct SettingsView: View {
 
     static let themes: [(id: String, name: String)] = [
         ("default", "Default"), ("solarized", "Solarized"), ("nord", "Nord"), ("gruvbox", "Gruvbox"), ("sepia", "Sepia"),
+        ("github", "GitHub"), ("one", "One"), ("dracula", "Dracula"), ("tokyonight", "Tokyo Night"),
+        ("catppuccin", "Catppuccin"), ("rosepine", "Rosé Pine"),
     ]
 
     @AppStorage("appLanguage") private var appLanguage = "system"
@@ -137,10 +139,10 @@ struct SettingsView: View {
                     Text("Light").tag("light")
                     Text("Dark").tag("dark")
                 }
-                Picker("Editor and preview theme", selection: $editorTheme) {
+                Picker("Theme", selection: $editorTheme) {
                     ForEach(Self.themes, id: \.id) { Text(L($0.name)).tag($0.id) }
                 }
-                hint("Each theme has a light and a dark variant that follows the app appearance.")
+                hint("Each theme has a light and a dark variant that follows the app appearance. For Solarized Dark, choose Solarized and set the app appearance to Dark.")
             }
             Section("Custom CSS") {
                 HStack {

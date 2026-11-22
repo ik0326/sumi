@@ -116,7 +116,8 @@ T = {
 "Use system clipboard for yank and paste": "ヤンクとペーストにシステムのクリップボードを使う",
 "Theme": "テーマ", "App appearance": "アプリの外観", "Light": "ライト", "Dark": "ダーク",
 "Editor and preview theme": "エディタとプレビューのテーマ",
-"Each theme has a light and a dark variant that follows the app appearance.": "どのテーマにもライトとダークがあり、アプリの外観に合わせて切り替わります。",
+"Each theme has a light and a dark variant that follows the app appearance. For Solarized Dark, choose Solarized and set the app appearance to Dark.":
+    "どのテーマにもライトとダークがあり、アプリの外観に合わせて切り替わります。Solarized Dark にするには、テーマで Solarized を選び、アプリの外観を「ダーク」にします。",
 "Custom CSS": "カスタム CSS", "Not used": "未使用", "Loaded": "読み込み済み", "Open": "開く",
 "Your own CSS for the editor and the preview. Changes apply when you come back to Sumi.":
     "エディタとプレビューに適用する独自の CSS です。変更は Sumi に戻ったときに反映されます。",

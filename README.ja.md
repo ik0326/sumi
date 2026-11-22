@@ -18,7 +18,8 @@
 - **Mac 上で動く AI** — 要約、推敲、誤字修正、翻訳、タイトル案・タグ案、ノートへの質問、入力中の提案（任意）。Apple Intelligence を使うので、ノートの内容は Mac の外に出ません。
 - **iCloud 同期** — ノートを iCloud Drive に置いて、複数の Mac で共有できます。
 - **変更履歴**、**テンプレート**、どのアプリからでも呼び出せる**クイックノート**、ファイルの添付、Markdown / HTML / PDF への書き出し。
-- **カスタマイズ** — エディタのテーマ、独自の CSS、キーの割り当て（`keymap.json`）、JavaScript のプラグイン。
+- **テーマ** — ライトとダークを備えた 11 種類。ウインドウ全体に適用されます（Solarized、Nord、Gruvbox、Dracula、Tokyo Night、Catppuccin、One、Rosé Pine、GitHub、Sepia、標準）。
+- **カスタマイズ** — 独自の CSS、キーの割り当て（`keymap.json`）、JavaScript のプラグイン。
 - 画面の言語は**日本語と英語**から選べます。
 
 | Telescope | ライト表示・英語 |

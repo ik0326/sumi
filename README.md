@@ -18,7 +18,8 @@ A simple, native Markdown notes app for macOS — with Vim keybindings, on-devic
 - **On-device AI** — summarize, improve, proofread, translate, suggest titles and tags, ask questions about a note, and optional suggestions while typing. Uses Apple Intelligence, so note text stays on your Mac.
 - **iCloud sync** — keep notes in iCloud Drive and share them between your Macs.
 - **Revision history**, **templates**, **Quick Note** window with a global shortcut, attachments, and export to Markdown, HTML and PDF.
-- **Customizable** — editor themes, your own CSS, key bindings (`keymap.json`) and JavaScript plugins.
+- **Themes** — 11 themes, each with a light and a dark variant, applied to the whole window: Solarized, Nord, Gruvbox, Dracula, Tokyo Night, Catppuccin, One, Rosé Pine, GitHub, Sepia and the default.
+- **Customizable** — your own CSS, key bindings (`keymap.json`) and JavaScript plugins.
 - **English and Japanese** interface.
 
 | Telescope | Dark appearance, Japanese interface |

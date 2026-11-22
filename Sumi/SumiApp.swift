@@ -51,12 +51,14 @@ struct ContentView: View {
         )
         NavigationSplitView(columnVisibility: visibility) {
             SidebarView()
+                .modifier(ThemedPane(part: .sidebar))
                 .navigationSplitViewColumnWidth(min: 180, ideal: 220, max: 340)
         } detail: {
             HStack(spacing: 0) {
                 if !app.distractionFree {
                     NoteListView()
                         .frame(width: listWidth)
+                        .modifier(ThemedPane(part: .list))
                     Divider()
                         .overlay {
                             Color.clear
@@ -73,6 +75,7 @@ struct ContentView: View {
                 }
                 EditorPane()
                     .frame(minWidth: 360, maxWidth: .infinity, maxHeight: .infinity)
+                    .modifier(ThemedPane(part: .editor))
             }
         }
         .modifier(NoteWindowChrome(app: app))
@@ -123,6 +126,7 @@ struct NoteWindowChrome: ViewModifier {
             }
             .onAppear { if activeState == .key { AppState.focused = app } }
             .onChange(of: activeState) { if activeState == .key { AppState.focused = app } }
+            .modifier(ThemedWindow())
     }
 }
 
@@ -137,6 +141,7 @@ struct QuickNoteView: View {
         Group {
             if let app {
                 EditorPane()
+                    .modifier(ThemedPane(part: .editor))
                     .modifier(NoteWindowChrome(app: app))
                     .environment(app)
             } else {

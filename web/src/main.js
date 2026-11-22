@@ -18,6 +18,7 @@ import DOMPurify from 'dompurify'
 import { full as emojiPlugin } from 'markdown-it-emoji'
 import emojiDefs from 'markdown-it-emoji/lib/data/full.mjs'
 import 'katex/dist/katex.min.css'
+import './themes.css'
 import './style.css'
 import { hclDescription, hclHighlight } from './hcl.js'
 
@@ -1058,7 +1059,7 @@ function loadMermaid() {
       const el = document.createElement('script')
       el.src = 'mermaid.min.js'
       el.onload = () => {
-        const dark = window.matchMedia('(prefers-color-scheme: dark)').matches
+        const dark = opts.scheme === 'dark' || (opts.scheme !== 'light' && window.matchMedia('(prefers-color-scheme: dark)').matches)
         window.mermaid.initialize({ startOnLoad: false, securityLevel: 'strict', theme: dark ? 'dark' : 'default' })
         resolve(window.mermaid)
       }
@@ -1311,6 +1312,8 @@ window.sumi = {
     document.documentElement.classList.toggle('readable', !!opts.readable)
     if (opts.theme && opts.theme !== 'default') document.documentElement.dataset.theme = opts.theme
     else delete document.documentElement.dataset.theme
+    if (opts.scheme === 'light' || opts.scheme === 'dark') document.documentElement.dataset.scheme = opts.scheme
+    else delete document.documentElement.dataset.scheme
     let css = document.getElementById('user-css')
     if (!css) {
       css = document.createElement('style')

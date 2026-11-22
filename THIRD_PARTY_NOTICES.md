@@ -10,6 +10,12 @@ The editor themes use color palettes from these projects:
 - Solarized — Copyright (c) Ethan Schoonover — MIT License — https://ethanschoonover.com/solarized/
 - Nord — Copyright (c) Sven Greb and contributors — MIT License — https://www.nordtheme.com/
 - Gruvbox — Copyright (c) Pavel Pertsev — MIT/X11 License — https://github.com/morhetz/gruvbox
+- Dracula — Copyright (c) Dracula Theme — MIT License — https://draculatheme.com/
+- Tokyo Night — Copyright (c) Folke Lemaitre and enkia — MIT / Apache-2.0 License — https://github.com/folke/tokyonight.nvim
+- Catppuccin — Copyright (c) Catppuccin — MIT License — https://catppuccin.com/
+- One Dark / One Light — Copyright (c) GitHub Inc. (Atom) — MIT License — https://github.com/atom/atom
+- Rosé Pine — Copyright (c) Rosé Pine — MIT License — https://rosepinetheme.com/
+- GitHub colors — Copyright (c) GitHub Inc. (Primer) — MIT License — https://primer.style/
 
 ## Fonts
 
