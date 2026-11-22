@@ -21,7 +21,7 @@ A simple, native Markdown notes app for macOS — with Vim keybindings, on-devic
 - **Revision history**, **templates**, **Quick Note** window with a global shortcut, attachments, and export to Markdown, HTML and PDF.
 - **Themes** — 11 themes, each with a light and a dark variant, applied to the whole window: Solarized, Nord, Gruvbox, Dracula, Tokyo Night, Catppuccin, One, Rosé Pine, GitHub, Sepia and the default.
 - **Customizable** — your own CSS, key bindings (`keymap.json`) and JavaScript plugins.
-- **Updates in one click** — Sumi tells you when a new version is available and updates itself.
+- **Built-in updates** — Sumi tells you when a new version is available and updates itself. Updates are signed and verified (Sparkle).
 - **English and Japanese** interface.
 
 | Telescope | Dark appearance, Japanese interface |

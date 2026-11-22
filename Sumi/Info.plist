@@ -33,6 +33,14 @@
 	<string>1.0</string>
 	<key>CFBundleVersion</key>
 	<string>1</string>
+	<key>SUEnableAutomaticChecks</key>
+	<true/>
+	<key>SUFeedURL</key>
+	<string>https://github.com/ik0326/sumi/releases/latest/download/appcast.xml</string>
+	<key>SUPublicEDKey</key>
+	<string>ltobyM5ko0zYSeQ5cC1d+yZ3Q04VNE/u4y8wtIzuDSA=</string>
+	<key>SUScheduledCheckInterval</key>
+	<integer>86400</integer>
 	<key>UTImportedTypeDeclarations</key>
 	<array>
 		<dict>

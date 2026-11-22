@@ -4,10 +4,16 @@ options:
   deploymentTarget:
     macOS: "14.0"
   createIntermediateGroups: true
+packages:
+  Sparkle:
+    url: https://github.com/sparkle-project/Sparkle
+    from: "2.10.1"
 targets:
   Sumi:
     type: application
     platform: macOS
+    dependencies:
+      - package: Sparkle
     sources:
       - path: Sumi
         excludes:
@@ -17,6 +23,10 @@ targets:
     info:
       path: Sumi/Info.plist
       properties:
+        SUFeedURL: https://github.com/ik0326/sumi/releases/latest/download/appcast.xml
+        SUPublicEDKey: ltobyM5ko0zYSeQ5cC1d+yZ3Q04VNE/u4y8wtIzuDSA=
+        SUEnableAutomaticChecks: true
+        SUScheduledCheckInterval: 86400
         CFBundleDocumentTypes:
           - CFBundleTypeName: Markdown Document
             CFBundleTypeRole: Editor
@@ -42,8 +52,8 @@ targets:
         GENERATE_INFOPLIST_FILE: YES
         INFOPLIST_KEY_LSApplicationCategoryType: public.app-category.productivity
         INFOPLIST_KEY_CFBundleDisplayName: Sumi
-        MARKETING_VERSION: "0.5.0"
-        CURRENT_PROJECT_VERSION: "5"
+        MARKETING_VERSION: "0.6.0"
+        CURRENT_PROJECT_VERSION: "6"
         CODE_SIGN_IDENTITY: "-"
         CODE_SIGN_STYLE: Automatic
         ENABLE_HARDENED_RUNTIME: NO

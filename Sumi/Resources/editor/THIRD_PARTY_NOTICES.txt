@@ -17,6 +17,13 @@ The editor themes use color palettes from these projects:
 - Rosé Pine — Copyright (c) Rosé Pine — MIT License — https://rosepinetheme.com/
 - GitHub colors — Copyright (c) GitHub Inc. (Primer) — MIT License — https://primer.style/
 
+## Sparkle
+
+In-app updates use Sparkle — Copyright (c) 2006-2013 Andy Matuschak, 2009-2013 Elgato Systems GmbH,
+2011-2014 Kornel Lesiński, 2015-2017 Mayur Pawashe, 2014 C.W. Betts, 2014 Petroules Corporation,
+2014 Big Nerd Ranch, and the Sparkle Project contributors — MIT License, with bundled components under
+their own licenses — https://github.com/sparkle-project/Sparkle/blob/2.x/LICENSE
+
 ## Fonts
 
 The math fonts bundled with KaTeX are licensed under the SIL Open Font License 1.1.

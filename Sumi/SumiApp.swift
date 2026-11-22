@@ -180,7 +180,7 @@ struct AppCommands: Commands {
 
     var body: some Commands {
         CommandGroup(after: .appInfo) {
-            Button("Check for Updates…") { Task { await Updater.shared.checkFromMenu() } }
+            Button("Check for Updates…") { Updater.shared.checkForUpdates() }
             Button("Acknowledgements") {
                 if let url = Bundle.main.resourceURL?.appendingPathComponent("editor/THIRD_PARTY_NOTICES.txt") {
                     NSWorkspace.shared.open(url)
