@@ -156,3 +156,8 @@ body { display: flex; flex-direction: column; font-family: var(--sans); }
 }
 
 #editor .cm-ghost { color: var(--muted); opacity: 0.75; font-style: italic; pointer-events: none; }
+
+/* Collapsible sections (<details>) */
+.markdown-body details { margin: 0.8em 0; }
+.markdown-body details > summary { cursor: pointer; font-weight: 600; }
+.markdown-body details[open] > summary { margin-bottom: 0.5em; }

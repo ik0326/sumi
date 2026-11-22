@@ -440,6 +440,7 @@ const SLASH = [
   ['Horizontal rule', '---', (v, f, to) => put(v, f, to, '* * *\n')],
   ['Link', '[]', (v, f, to) => put(v, f, to, '[](url)', 1)],
   ['Image', '![]', (v, f, to) => put(v, f, to, '![](url)', 2)],
+  ['Details', '<details>', (v, f, to) => put(v, f, to, '<details>\n<summary></summary>\n\n\n\n</details>', 19)],
   ['Note alert', '!', (v, f, to) => put(v, f, to, '> [!NOTE]\n> ')],
   ['Tip alert', '!', (v, f, to) => put(v, f, to, '> [!TIP]\n> ')],
   ['Important alert', '!', (v, f, to) => put(v, f, to, '> [!IMPORTANT]\n> ')],
@@ -1046,6 +1047,8 @@ function takeFiles(dt) {
 // ---------- Preview ----------
 const PURIFY = {
   ADD_ATTR: ['target'],
+  // A note must not restyle the app or show fake forms.
+  FORBID_TAGS: ['style', 'form', 'textarea', 'select', 'button'],
   ALLOWED_URI_REGEXP: /^(?:(?:https?|mailto|tel|sumi):|[^a-z]|[a-z+.\-]+(?:[^a-z+.\-:]|$))/i,
 }
 const COLOR_RE = /^(#(?:[0-9a-f]{3,4}|[0-9a-f]{6}|[0-9a-f]{8})|rgba?\([\d\s,.%/]+\)|hsla?\([\d\s,.%/deg]+\))$/i

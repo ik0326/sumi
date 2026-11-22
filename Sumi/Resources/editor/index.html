@@ -3,6 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- Note content is untrusted: no inline scripts or event handlers, no frames, plugins or forms. -->
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' sumi://app 'unsafe-eval'; style-src 'self' sumi://app 'unsafe-inline'; img-src 'self' sumi: https: http: data: blob:; media-src 'self' sumi: https: http: data: blob:; font-src 'self' sumi://app data:; connect-src 'self' sumi://app https:; object-src 'none'; frame-src 'none'; base-uri 'none'; form-action 'none'">
 <link rel="stylesheet" href="editor.css">
 </head>
 <body>

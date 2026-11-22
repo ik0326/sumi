@@ -20,14 +20,24 @@ final class SumiSchemeHandler: NSObject, WKURLSchemeHandler {
         }
         var file: URL?
         if url.host == "app", let base = Bundle.main.resourceURL?.appendingPathComponent("editor") {
-            let candidate = base.appendingPathComponent(url.path).standardizedFileURL
-            if candidate.path.hasPrefix(base.standardizedFileURL.path) { file = candidate }
-            if let found = file, !FileManager.default.fileExists(atPath: found.path), let dir = document()?.standardizedFileURL {
-                let beside = dir.appendingPathComponent(url.path).standardizedFileURL
-                if beside.path.hasPrefix(dir.path + "/") { file = beside }
+            let root = base.resolvingSymlinksInPath().path + "/"
+            let candidate = base.appendingPathComponent(url.path).resolvingSymlinksInPath()
+            if candidate.path.hasPrefix(root) { file = candidate }
+            if let found = file, !FileManager.default.fileExists(atPath: found.path) {
+                file = nil
+                // Beside a Markdown file edited in place: only pictures and media, and never through a
+                // link that leads out of its folder.
+                if let dir = document()?.resolvingSymlinksInPath() {
+                    let beside = dir.appendingPathComponent(url.path).resolvingSymlinksInPath()
+                    let type = UTType(filenameExtension: beside.pathExtension)
+                    let media = type.map { $0.conforms(to: .image) || $0.conforms(to: .audiovisualContent) } ?? false
+                    if media, beside.path.hasPrefix(dir.path + "/") { file = beside }
+                }
             }
         } else if url.host == "attachment" {
-            file = attachments().appendingPathComponent(url.lastPathComponent)
+            let dir = attachments().resolvingSymlinksInPath()
+            let candidate = dir.appendingPathComponent(url.lastPathComponent).resolvingSymlinksInPath()
+            if candidate.path.hasPrefix(dir.path + "/") { file = candidate }
         }
         guard let file, let data = try? Data(contentsOf: file) else {
             task.didFailWithError(URLError(.fileDoesNotExist))
@@ -37,7 +47,7 @@ final class SumiSchemeHandler: NSObject, WKURLSchemeHandler {
         if mime.hasPrefix("text/") || mime.contains("javascript") { mime += "; charset=utf-8" }
         let response = HTTPURLResponse(
             url: url, statusCode: 200, httpVersion: "HTTP/1.1",
-            headerFields: ["Content-Type": mime, "Content-Length": "\(data.count)"]
+            headerFields: ["Content-Type": mime, "Content-Length": "\(data.count)", "X-Content-Type-Options": "nosniff"]
         )!
         task.didReceive(response)
         task.didReceive(data)
