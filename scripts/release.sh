@@ -26,7 +26,11 @@ APP="$OUT/dd/Build/Products/Release/Sumi.app"
 [ "$(/usr/libexec/PlistBuddy -c 'Print :CFBundleShortVersionString' "$APP/Contents/Info.plist")" = "$VERSION" ]
 codesign --verify --deep --strict "$APP"
 LEAKS=$(grep -rl "$HOME" "$APP" || true)
-if [ -n "$LEAKS" ]; then echo "The build contains your home folder path in:"; echo "$LEAKS"; exit 1; fi
+if [ -n "$LEAKS" ]; then
+  echo "The build contains your home folder path in:"; echo "$LEAKS"
+  echo "$LEAKS" | while read -r f; do LC_ALL=C grep -a -o ".\{0,50\}$HOME.\{0,90\}" "$f" | LC_ALL=C tr -c '[:print:]\n' '.' | sort -u | head -5; done
+  exit 1
+fi
 
 mkdir "$OUT/feed"
 ZIP="Sumi-$VERSION.zip"
