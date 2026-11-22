@@ -29,13 +29,28 @@ A simple, native Markdown notes app for macOS — with Vim keybindings, on-devic
 - macOS 14 or later
 - AI features need macOS 26 or later on a Mac that supports Apple Intelligence. Everything else works without it.
 
+## Download
+
+Get `Sumi-x.y.z.zip` from the [latest release](https://github.com/ik0326/sumi/releases/latest), unzip it and move **Sumi** to your Applications folder. It runs on Apple silicon and Intel Macs.
+
+The app is not notarized by Apple yet, so macOS blocks it the first time you open it. To allow it:
+
+1. Open Sumi once and dismiss the warning.
+2. Open **System Settings › Privacy & Security**, scroll down, and click **Open Anyway** next to the message about Sumi.
+
+Or remove the download flag in Terminal:
+
+```sh
+xattr -dr com.apple.quarantine /Applications/Sumi.app
+```
+
 ## Build from source
 
-There is no prebuilt download yet. You need Xcode and [XcodeGen](https://github.com/yonaskolb/XcodeGen).
+You need Xcode and [XcodeGen](https://github.com/yonaskolb/XcodeGen).
 
 ```sh
 brew install xcodegen
-git clone <this repository>
+git clone https://github.com/ik0326/sumi.git
 cd sumi
 xcodegen generate
 xcodebuild -project Sumi.xcodeproj -scheme Sumi -configuration Release -derivedDataPath build build

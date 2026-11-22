@@ -29,13 +29,28 @@
 - macOS 14 以降
 - AI 機能には、Apple Intelligence に対応した Mac と macOS 26 以降が必要です。それ以外の機能は AI なしで使えます。
 
+## ダウンロード
+
+[最新のリリース](https://github.com/ik0326/sumi/releases/latest) から `Sumi-x.y.z.zip` をダウンロードして展開し、**Sumi** を「アプリケーション」フォルダに移動します。Apple シリコンと Intel のどちらの Mac でも動きます。
+
+まだ Apple の公証を受けていないため、初めて開くときに macOS が起動を止めます。次の手順で許可してください。
+
+1. Sumi を一度開き、警告を閉じます。
+2. **システム設定 › プライバシーとセキュリティ** を開いて下へスクロールし、Sumi についての表示の横にある **このまま開く** をクリックします。
+
+ターミナルでダウンロードの印を外す方法もあります。
+
+```sh
+xattr -dr com.apple.quarantine /Applications/Sumi.app
+```
+
 ## ソースからビルドする
 
-ビルド済みのアプリはまだ配布していません。Xcode と [XcodeGen](https://github.com/yonaskolb/XcodeGen) が必要です。
+Xcode と [XcodeGen](https://github.com/yonaskolb/XcodeGen) が必要です。
 
 ```sh
 brew install xcodegen
-git clone <このリポジトリ>
+git clone https://github.com/ik0326/sumi.git
 cd sumi
 xcodegen generate
 xcodebuild -project Sumi.xcodeproj -scheme Sumi -configuration Release -derivedDataPath build build
