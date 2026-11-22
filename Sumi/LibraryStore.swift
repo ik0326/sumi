@@ -16,6 +16,10 @@ final class LibraryStore {
     private(set) var externalVersion: [String: Int] = [:]
 
     @ObservationIgnored private(set) var root: URL
+    /// Set when this store edits a single Markdown file in place instead of a library.
+    @ObservationIgnored private(set) var fileURL: URL?
+    @ObservationIgnored private var fileUsesCRLF = false
+    static let fileNoteID = "file"
     @ObservationIgnored private var dirtyNotes = Set<String>()
     @ObservationIgnored private var removedNotes = Set<String>()
     @ObservationIgnored private var libraryDirty = false
@@ -90,6 +94,62 @@ final class LibraryStore {
         }
     }
 
+    /// A store holding one note whose text is the file's; saving writes back to the file.
+    /// nil when the file is not UTF-8 text.
+    init?(file url: URL) {
+        guard let raw = try? String(contentsOf: url, encoding: .utf8) else { return nil }
+        fileURL = url
+        fileUsesCRLF = raw.contains("\r\n")
+        // Revisions of this editing session only; nothing of value is kept here.
+        root = FileManager.default.temporaryDirectory.appendingPathComponent("Sumi-file-\(UUID().uuidString)", isDirectory: true)
+        for dir in [notesDir, attachmentsDir, revisionsDir] {
+            try? FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
+        }
+        var note = Note(id: Self.fileNoteID, title: url.lastPathComponent, body: raw.replacingOccurrences(of: "\r\n", with: "\n"))
+        if let modified = Self.mtime(url) { note.updatedAt = modified }
+        notes[note.id] = note
+        stamps[note.id] = Self.mtime(url)
+        let center = NotificationCenter.default
+        center.addObserver(forName: NSApplication.willTerminateNotification, object: nil, queue: .main) { [weak self] _ in
+            MainActor.assumeIsolated { self?.flush() }
+        }
+        center.addObserver(forName: NSApplication.didBecomeActiveNotification, object: nil, queue: .main) { [weak self] _ in
+            MainActor.assumeIsolated { self?.reloadFile() }
+        }
+    }
+
+    /// Picks up a change made to the file by another app, unless there are unsaved edits here.
+    private func reloadFile() {
+        guard let fileURL, dirtyNotes.isEmpty, let modified = Self.mtime(fileURL), modified != stamps[Self.fileNoteID],
+              let raw = try? String(contentsOf: fileURL, encoding: .utf8) else { return }
+        stamps[Self.fileNoteID] = modified
+        let text = raw.replacingOccurrences(of: "\r\n", with: "\n")
+        guard notes[Self.fileNoteID]?.body != text else { return }
+        notes[Self.fileNoteID]?.body = text
+        externalVersion[Self.fileNoteID, default: 0] += 1
+    }
+
+    /// The folder of the file being edited; pasted images and attachments go next to it.
+    var documentDir: URL? { fileURL?.deletingLastPathComponent() }
+
+    /// Copies data into the document's folder under a free name and returns that name.
+    func saveBesideFile(_ data: Data, name: String) -> String? {
+        guard let dir = documentDir else { return nil }
+        let url = URL(fileURLWithPath: name)
+        let base = url.deletingPathExtension().lastPathComponent, ext = url.pathExtension
+        var candidate = name, n = 1
+        while FileManager.default.fileExists(atPath: dir.appendingPathComponent(candidate).path) {
+            n += 1
+            candidate = base + "-\(n)" + (ext.isEmpty ? "" : "." + ext)
+        }
+        do {
+            try data.write(to: dir.appendingPathComponent(candidate), options: .atomic)
+            return candidate
+        } catch {
+            return nil
+        }
+    }
+
     // MARK: Persistence
 
     private func openLibrary() {
@@ -126,6 +186,15 @@ final class LibraryStore {
 
     func flush() {
         saveTask?.cancel()
+        if let fileURL {
+            if dirtyNotes.contains(Self.fileNoteID), let note = notes[Self.fileNoteID] {
+                let text = fileUsesCRLF ? note.body.replacingOccurrences(of: "\n", with: "\r\n") : note.body
+                try? text.write(to: fileURL, atomically: true, encoding: .utf8)
+                stamps[Self.fileNoteID] = Self.mtime(fileURL)
+            }
+            dirtyNotes.removeAll()
+            return
+        }
         for id in dirtyNotes {
             guard let note = notes[id], let data = try? Self.encoder.encode(note) else { continue }
             let file = notesDir.appendingPathComponent("\(id).json")

@@ -157,6 +157,10 @@ The on-device model reads about the first %d characters of long text.''':
 "Its sub-notebooks are deleted and all notes inside are moved to the Trash.": "サブノートブックも削除され、中のノートはすべてゴミ箱に移動します。",
 "Detail": "詳細", "Move to Top Level": "最上位に移動", "New Sub-notebook…": "新規サブノートブック…", "Rename…": "名前を変更…",
 "Delete…": "削除…",
+# Files
+"Open File…": "ファイルを開く…", "Markdown File": "Markdown ファイル", "Show in Finder": "Finder に表示",
+"This file could not be opened": "このファイルは開けませんでした",
+"Sumi opens text files saved as UTF-8.": "Sumi で開けるのは、UTF-8 で保存されたテキストファイルです。",
 # Tag bar
 "Create “%@”": "「%@」を作成", "Remove tag": "タグを外す", "Show Notes with This Tag": "このタグのノートを表示",
 "Remove from Note": "ノートから外す",

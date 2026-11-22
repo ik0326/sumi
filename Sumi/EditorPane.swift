@@ -25,7 +25,10 @@ struct EditorPane: View {
         let note = self.note
 
         VStack(spacing: 0) {
-            if let note {
+            if let note, let file = store.fileURL {
+                fileHeader(file)
+                Divider()
+            } else if let note {
                 header(note).zIndex(1)
                 backlinks(note)
                 Divider()
@@ -55,10 +58,12 @@ struct EditorPane: View {
         }
         .toolbar {
             ToolbarItemGroup(placement: .navigation) {
+              if store.fileURL == nil {
                 Button { app.run("core:navigate-back") } label: { Image(systemName: "chevron.left") }
                     .help("Back (⌘←)")
                 Button { app.run("core:navigate-forward") } label: { Image(systemName: "chevron.right") }
                     .help("Forward (⌘→)")
+              }
             }
             ToolbarItemGroup {
                 Picker("View", selection: $app.viewMode) {
@@ -67,11 +72,13 @@ struct EditorPane: View {
                     Image(systemName: "eye").tag(ViewMode.preview).help("Preview (⌘E)")
                 }
                 .pickerStyle(.segmented)
-                Button { app.run("view:toggle-distraction-free") } label: {
-                    Image(systemName: app.distractionFree ? "arrow.down.right.and.arrow.up.left" : "arrow.up.left.and.arrow.down.right")
+                if store.fileURL == nil {
+                    Button { app.run("view:toggle-distraction-free") } label: {
+                        Image(systemName: app.distractionFree ? "arrow.down.right.and.arrow.up.left" : "arrow.up.left.and.arrow.down.right")
+                    }
+                    .help("Distraction Free (⌘⇧D)")
                 }
-                .help("Distraction Free (⌘⇧D)")
-                if let note {
+                if let note, store.fileURL == nil {
                     Menu {
                         NoteActions(note: note)
                     } label: {
@@ -84,6 +91,26 @@ struct EditorPane: View {
         .onChange(of: app.titleFocusRequest) {
             DispatchQueue.main.async { titleFocused = true }
         }
+    }
+
+    /// Shown instead of the note header when a Markdown file is edited in place.
+    private func fileHeader(_ file: URL) -> some View {
+        HStack(spacing: 8) {
+            Image(systemName: "doc.text").foregroundStyle(.secondary)
+            Text(file.lastPathComponent).font(.system(size: 15, weight: .semibold)).lineLimit(1)
+            Text(file.deletingLastPathComponent().path.replacingOccurrences(of: NSHomeDirectory(), with: "~"))
+                .font(.callout).foregroundStyle(.secondary).lineLimit(1).truncationMode(.head)
+            Spacer(minLength: 0)
+            Button {
+                NSWorkspace.shared.activateFileViewerSelecting([file])
+            } label: {
+                Image(systemName: "folder")
+            }
+            .buttonStyle(.plain)
+            .help("Show in Finder")
+        }
+        .padding(.horizontal, 24)
+        .padding(.vertical, 10)
     }
 
     @ViewBuilder

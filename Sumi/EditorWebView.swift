@@ -5,8 +5,13 @@ import WebKit
 /// Serves the bundled editor (`sumi://app/…`) and note attachments (`sumi://attachment/…`).
 final class SumiSchemeHandler: NSObject, WKURLSchemeHandler {
     let attachments: () -> URL
+    /// The folder of the Markdown file being edited in place, so its relative images load.
+    let document: () -> URL?
 
-    init(attachments: @escaping () -> URL) { self.attachments = attachments }
+    init(attachments: @escaping () -> URL, document: @escaping () -> URL? = { nil }) {
+        self.attachments = attachments
+        self.document = document
+    }
 
     func webView(_ webView: WKWebView, start task: WKURLSchemeTask) {
         guard let url = task.request.url else {
@@ -17,6 +22,10 @@ final class SumiSchemeHandler: NSObject, WKURLSchemeHandler {
         if url.host == "app", let base = Bundle.main.resourceURL?.appendingPathComponent("editor") {
             let candidate = base.appendingPathComponent(url.path).standardizedFileURL
             if candidate.path.hasPrefix(base.standardizedFileURL.path) { file = candidate }
+            if let found = file, !FileManager.default.fileExists(atPath: found.path), let dir = document()?.standardizedFileURL {
+                let beside = dir.appendingPathComponent(url.path).standardizedFileURL
+                if beside.path.hasPrefix(dir.path + "/") { file = beside }
+            }
         } else if url.host == "attachment" {
             file = attachments().appendingPathComponent(url.lastPathComponent)
         }
@@ -52,7 +61,8 @@ struct EditorWebView: NSViewRepresentable {
 
     func makeNSView(context: Context) -> WKWebView {
         let config = WKWebViewConfiguration()
-        config.setURLSchemeHandler(SumiSchemeHandler(attachments: { [store] in MainActor.assumeIsolated { store.attachmentsDir } }), forURLScheme: "sumi")
+        config.setURLSchemeHandler(SumiSchemeHandler(attachments: { [store] in MainActor.assumeIsolated { store.attachmentsDir } },
+                                                         document: { [store] in MainActor.assumeIsolated { store.documentDir } }), forURLScheme: "sumi")
         config.userContentController.add(context.coordinator, name: "sumi")
         let webView = WKWebView(frame: .zero, configuration: config)
         webView.navigationDelegate = context.coordinator
@@ -240,7 +250,14 @@ struct EditorWebView: NSViewRepresentable {
                     return AppCommand(id: id, title: $0["title"] as? String ?? id)
                 }
             case "file":
-                if let b64 = msg["data"] as? String, let data = Data(base64Encoded: b64),
+                if store.fileURL != nil {
+                    if let b64 = msg["data"] as? String, let data = Data(base64Encoded: b64),
+                       let original = msg["name"] as? String,
+                       let stored = store.saveBesideFile(data, name: URL(fileURLWithPath: original).lastPathComponent) {
+                        let link = stored.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) ?? stored
+                        app.editor.call("insertText", ["text": "[\(stored)](\(link))"])
+                    }
+                } else if let b64 = msg["data"] as? String, let data = Data(base64Encoded: b64),
                    let original = msg["name"] as? String, let stored = store.saveAttachment(data, name: original) {
                     let label = original.replacingOccurrences(of: "[", with: "(").replacingOccurrences(of: "]", with: ")")
                     app.editor.call("insertText", ["text": "[\(label)](sumi://attachment/\(stored))"])
@@ -257,7 +274,13 @@ struct EditorWebView: NSViewRepresentable {
                     if runnable { NSWorkspace.shared.activateFileViewerSelecting([file]) } else { NSWorkspace.shared.open(file) }
                 }
             case "image":
-                if let b64 = msg["data"] as? String, let data = Data(base64Encoded: b64),
+                if store.fileURL != nil {
+                    let ext = (msg["ext"] as? String ?? "png").filter { $0.isLetter || $0.isNumber }.lowercased()
+                    if let b64 = msg["data"] as? String, let data = Data(base64Encoded: b64),
+                       let stored = store.saveBesideFile(data, name: "image." + (ext.isEmpty ? "png" : ext)) {
+                        app.editor.call("insertText", ["text": "![image](\(stored))"])
+                    }
+                } else if let b64 = msg["data"] as? String, let data = Data(base64Encoded: b64),
                    let name = store.saveAttachment(data, ext: msg["ext"] as? String ?? "png") {
                     app.editor.call("insertText", ["text": "![image](sumi://attachment/\(name))"])
                 }
@@ -268,7 +291,8 @@ struct EditorWebView: NSViewRepresentable {
 
         func webView(_ webView: WKWebView, decidePolicyFor action: WKNavigationAction,
                      decisionHandler: @escaping (WKNavigationActionPolicy) -> Void) {
-            if let url = action.request.url, url.scheme == "sumi", url.host == "app" {
+            // Only the editor page itself may load; a relative link in a note must not replace it.
+            if let url = action.request.url, url.scheme == "sumi", url.host == "app", url.path == "/index.html" {
                 decisionHandler(.allow)
             } else {
                 decisionHandler(.cancel)

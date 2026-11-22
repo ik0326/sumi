@@ -2,6 +2,7 @@ import SwiftUI
 
 @main
 struct SumiApp: App {
+    @NSApplicationDelegateAdaptor(AppDelegate.self) private var appDelegate
     @State private var store: LibraryStore
     @State private var app: AppState
 
@@ -27,6 +28,14 @@ struct SumiApp: App {
                 .frame(minWidth: 420, minHeight: 300)
         }
         .defaultSize(width: 640, height: 520)
+
+        WindowGroup("Markdown File", id: "file", for: URL.self) { $url in
+            if let url {
+                FileNoteView(url: url)
+                    .frame(minWidth: 420, minHeight: 300)
+            }
+        }
+        .defaultSize(width: 900, height: 700)
 
         Settings {
             SettingsView()
@@ -84,6 +93,7 @@ struct ContentView: View {
         }
         .onAppear {
             app.openQuickNoteWindow = { id in openWindow(id: "quick", value: id) }
+            FileOpener.shared.handler = { url in openWindow(id: "file", value: url) }
             registerHotkey()
             applyTheme()
             Customization.shared.start { [app] id in (AppState.focused ?? app).run(id) }
@@ -182,6 +192,7 @@ struct AppCommands: Commands {
             item("New Notebook…", "core:new-notebook").keyboardShortcut("n", modifiers: [.command, .shift])
             item("Choose a Template…", "core:choose-template").keyboardShortcut("t")
             Divider()
+            Button("Open File…") { FileOpener.shared.choose() }.keyboardShortcut("o")
             Button("Import Markdown…") { app.importMarkdown() }
             Button("Export as Markdown…") { app.exportSelected() }
                 .keyboardShortcut("e", modifiers: [.command, .shift])

@@ -190,7 +190,21 @@ final class AppState {
         .init(id: "core:save-note", title: "Save", keys: "⌘S"),
     ]
 
+    /// Commands that act on the library; they do nothing in a window that edits a file in place.
+    private static let libraryOnly: Set<String> = [
+        "core:new-note", "application:quick-note", "core:new-notebook", "core:choose-template", "core:delete-note",
+        "core:duplicate-note", "core:pin-note-to-top", "editor:focus-tags", "editor:focus-title", "core:telescope-tags",
+        "core:telescope-notebooks", "core:show-editor-action-menu", "core:show-revisions", "core:navigate-back",
+        "core:navigate-forward", "core:open-next-note", "core:open-prev-note", "core:sidebar-focus",
+        "core:focus-note-list-bar", "core:find", "core:find-global", "editor:copy-link", "core:clear-tag-filter",
+        "view:toggle-sidebar", "view:toggle-distraction-free",
+    ]
+
     func run(_ id: String) {
+        if store.fileURL != nil, Self.libraryOnly.contains(id) || id.hasPrefix("editor:change-note-status-") {
+            NSSound.beep()
+            return
+        }
         if id.hasPrefix("ai:"), let action = AIAction(rawValue: String(id.dropFirst(3))) {
             startAI(action)
             return

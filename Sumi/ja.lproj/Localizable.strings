@@ -290,6 +290,11 @@
 "New Sub-notebook…" = "新規サブノートブック…";
 "Rename…" = "名前を変更…";
 "Delete…" = "削除…";
+"Open File…" = "ファイルを開く…";
+"Markdown File" = "Markdown ファイル";
+"Show in Finder" = "Finder に表示";
+"This file could not be opened" = "このファイルは開けませんでした";
+"Sumi opens text files saved as UTF-8." = "Sumi で開けるのは、UTF-8 で保存されたテキストファイルです。";
 "Create “%@”" = "「%@」を作成";
 "Remove tag" = "タグを外す";
 "Show Notes with This Tag" = "このタグのノートを表示";
