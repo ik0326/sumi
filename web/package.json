@@ -1,0 +1,33 @@
+{
+  "name": "sumi-editor",
+  "private": true,
+  "version": "0.1.0",
+  "scripts": {
+    "build": "esbuild src/main.js --bundle --minify --format=iife --target=safari17 --loader:.woff2=dataurl --loader:.woff=empty --loader:.ttf=empty --outfile=../Sumi/Resources/editor/editor.js && cp node_modules/mermaid/dist/mermaid.min.js ../Sumi/Resources/editor/mermaid.min.js",
+    "notices": "python3 scripts/notices.py"
+  },
+  "dependencies": {
+    "@codemirror/autocomplete": "^6.20.4",
+    "@codemirror/commands": "^6.6.0",
+    "@codemirror/lang-markdown": "^6.2.5",
+    "@codemirror/language": "^6.10.2",
+    "@codemirror/language-data": "^6.5.1",
+    "@codemirror/search": "^6.5.6",
+    "@codemirror/state": "^6.4.1",
+    "@codemirror/view": "^6.28.0",
+    "@lezer/highlight": "^1.2.0",
+    "@replit/codemirror-vim": "^6.2.1",
+    "dompurify": "^3.4.18",
+    "highlight.js": "^11.9.0",
+    "katex": "^0.19.1",
+    "markdown-it": "^14.1.0",
+    "markdown-it-emoji": "^3.1.0",
+    "markdown-it-footnote": "^4.0.0",
+    "markdown-it-task-lists": "^2.1.1",
+    "markdown-it-texmath": "^1.0.0",
+    "mermaid": "^12.3.0"
+  },
+  "devDependencies": {
+    "esbuild": "^0.23.0"
+  }
+}
