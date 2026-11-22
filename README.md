@@ -13,6 +13,7 @@ A simple, native Markdown notes app for macOS — with Vim keybindings, on-devic
 - **Organize** — nested notebooks, tags with colors, note status (Active, On Hold, Completed, Dropped), pinning, and multiple selection.
 - **Find anything** — `⌘K` opens Telescope to jump to notes, notebooks, tags, headings and commands. Search supports qualifiers such as `tag:work`, `status:active` and `"exact phrase"`.
 - **Note links and backlinks** — type `[[` to link to another note; linked notes show where they are referenced.
+- **Code blocks** — syntax highlighting for about 190 languages (including HCL / Terraform) and completion of keywords, snippets and names used in the note.
 - **Table editing** — `Tab` moves between cells and formats the table; a toolbar adds, moves and aligns rows and columns.
 - **On-device AI** — summarize, improve, proofread, translate, suggest titles and tags, ask questions about a note, and optional suggestions while typing. Uses Apple Intelligence, so note text stays on your Mac.
 - **iCloud sync** — keep notes in iCloud Drive and share them between your Macs.

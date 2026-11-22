@@ -1,17 +1,17 @@
 import { EditorView, keymap, drawSelection, highlightActiveLine, lineNumbers, showTooltip, Decoration, WidgetType } from '@codemirror/view'
 import { EditorState, EditorSelection, Compartment, Prec, StateField, StateEffect } from '@codemirror/state'
-import { defaultKeymap, history, historyKeymap, indentWithTab, selectLine } from '@codemirror/commands'
+import { defaultKeymap, history, historyKeymap, indentMore, indentLess, selectLine } from '@codemirror/commands'
 import { markdown, markdownLanguage } from '@codemirror/lang-markdown'
 import { languages } from '@codemirror/language-data'
 import { syntaxHighlighting, HighlightStyle, indentUnit, bracketMatching } from '@codemirror/language'
-import { autocompletion } from '@codemirror/autocomplete'
+import { autocompletion, acceptCompletion } from '@codemirror/autocomplete'
 import { tags as t, classHighlighter } from '@lezer/highlight'
 import { searchKeymap, highlightSelectionMatches } from '@codemirror/search'
 import { vim, Vim, getCM } from '@replit/codemirror-vim'
 import MarkdownIt from 'markdown-it'
 import taskLists from 'markdown-it-task-lists'
 import footnote from 'markdown-it-footnote'
-import hljs from 'highlight.js/lib/common'
+import hljs from 'highlight.js'
 import katex from 'katex'
 import texmath from 'markdown-it-texmath'
 import DOMPurify from 'dompurify'
@@ -19,6 +19,10 @@ import { full as emojiPlugin } from 'markdown-it-emoji'
 import emojiDefs from 'markdown-it-emoji/lib/data/full.mjs'
 import 'katex/dist/katex.min.css'
 import './style.css'
+import { hclDescription, hclHighlight } from './hcl.js'
+
+hljs.registerLanguage('hcl', hclHighlight)
+const codeLanguages = [...languages, hclDescription]
 
 const post = (m) => {
   try { window.webkit.messageHandlers.sumi.postMessage(m) } catch (e) { /* not in app */ }
@@ -510,7 +514,7 @@ function linkSource(ctx) {
 }
 
 // ``` language names
-const LANGS = [...new Set(languages.flatMap((l) => [l.name.toLowerCase().replace(/\s+/g, ''), ...(l.alias || [])]))]
+const LANGS = [...new Set(codeLanguages.flatMap((l) => [l.name.toLowerCase().replace(/\s+/g, ''), ...(l.alias || [])]))]
   .concat(['math', 'mermaid']).sort()
 function langSource(ctx) {
   const line = ctx.state.doc.lineAt(ctx.pos)
@@ -518,6 +522,122 @@ function langSource(ctx) {
   const m = before.match(/^\s*(?:```|~~~)([\w+#-]*)$/)
   if (!m) return null
   return { from: ctx.pos - m[1].length, validFor: /^[\w+#-]*$/, options: LANGS.map((label) => ({ label })) }
+}
+
+// ---------- Tab key ----------
+/**
+ * Tab accepts an open completion, indents selected lines and list items,
+ * and otherwise inserts spaces up to the next tab stop at the cursor.
+ */
+function tabKey(view) {
+  if (acceptCompletion(view)) return true
+  const { state } = view
+  const listLine = (r) => /^\s*([-*+]|\d+[.)])\s/.test(state.doc.lineAt(r.head).text)
+  if (state.selection.ranges.some((r) => !r.empty || listLine(r))) return indentMore(view)
+  const size = state.facet(indentUnit).length || 4
+  view.dispatch(state.changeByRange((r) => {
+    const line = state.doc.lineAt(r.head)
+    let col = 0
+    for (const ch of line.text.slice(0, r.head - line.from)) col += ch === '\t' ? size - (col % size) : 1
+    const pad = ' '.repeat(size - (col % size))
+    return { changes: { from: r.head, insert: pad }, range: EditorSelection.cursor(r.head + pad.length) }
+  }), { userEvent: 'input', scrollIntoView: true })
+  return true
+}
+
+// ---------- Completion inside code blocks ----------
+/** The fenced code block that contains `pos`: { lang, line } or null. */
+function fenceAt(state, pos) {
+  const doc = state.doc, cur = doc.lineAt(pos).number
+  let open = null, n = 0
+  for (const text of doc.iterLines(1, cur)) {
+    n++
+    if (text.indexOf('```') < 0 && text.indexOf('~~~') < 0) continue
+    const m = /^\s*(`{3,}|~{3,})\s*([\w+#.-]*)/.exec(text)
+    if (!m) continue
+    if (!open) open = { mark: m[1], lang: m[2].toLowerCase(), line: n }
+    else if (m[1][0] === open.mark[0] && m[1].length >= open.mark.length && !m[2]) open = null
+  }
+  if (open && /^\s*(`{3,}|~{3,})/.test(doc.line(cur).text)) return null
+  return open
+}
+
+/** Wraps a completion source so it stays quiet inside code blocks. */
+function prose(source) {
+  return (ctx) => (fenceAt(ctx.state, ctx.pos) ? null : source(ctx))
+}
+
+const KEYWORD_TYPES = { keyword: 'keyword', built_in: 'function', type: 'type', literal: 'constant' }
+const keywordCache = new Map()
+/** Keywords and built-ins of a language, taken from the preview highlighter's definitions. */
+function keywordsFor(lang) {
+  if (keywordCache.has(lang)) return keywordCache.get(lang)
+  const out = new Map()
+  const add = (word, type) => {
+    word = String(word).split('|')[0]
+    if (word.length > 1 && /^[A-Za-z_$@#][\w$-]*$/.test(word) && !out.has(word)) out.set(word, type)
+  }
+  const def = lang && hljs.getLanguage(lang)
+  const k = def && (def.rawDefinition ? def.rawDefinition(hljs).keywords : def.keywords)
+  if (typeof k === 'string') k.split(/\s+/).forEach((w) => add(w, 'keyword'))
+  else if (Array.isArray(k)) k.forEach((w) => add(w, 'keyword'))
+  else if (k) {
+    for (const key of Object.keys(k)) {
+      if (key === '$pattern') continue
+      const v = k[key], type = KEYWORD_TYPES[key] || 'keyword'
+      if (typeof v === 'string') v.split(/\s+/).forEach((w) => add(w, type))
+      else if (Array.isArray(v)) v.forEach((w) => add(w, type))
+    }
+  }
+  keywordCache.set(lang, out)
+  return out
+}
+
+/** Identifiers used in the note's code blocks. */
+function codeWords(state, skipFrom, skipTo) {
+  const words = new Set()
+  let inside = false, pos = 0
+  for (const text of state.doc.iterLines()) {
+    const start = pos
+    pos += text.length + 1
+    if (/^\s*(`{3,}|~{3,})/.test(text)) { inside = !inside; continue }
+    if (!inside) continue
+    const re = /[A-Za-z_$][\w$]{2,}/g
+    let m
+    while ((m = re.exec(text))) {
+      const from = start + m.index
+      if (from === skipFrom && from + m[0].length === skipTo) continue
+      words.add(m[0])
+      if (words.size > 3000) return words
+    }
+  }
+  return words
+}
+
+async function codeSource(ctx) {
+  const fence = fenceAt(ctx.state, ctx.pos)
+  if (!fence) return null
+  const word = ctx.matchBefore(/[A-Za-z_$@#][\w$-]*/)
+  if (!word || (word.to - word.from < 2 && !ctx.explicit)) return null
+  const options = [], seen = new Set()
+  const push = (o) => { if (!seen.has(o.label)) { seen.add(o.label); options.push(o) } }
+  // What the language itself offers (snippets, local names, properties) comes first.
+  for (const source of ctx.state.languageDataAt('autocomplete', ctx.pos)) {
+    if (typeof source !== 'function') continue
+    try {
+      const r = await source(ctx)
+      if (r && r.from === word.from) r.options.forEach(push)
+    } catch (e) { /* a language source must never break typing */ }
+  }
+  // Languages such as Dockerfile and SQL ignore case: follow the case being typed.
+  const typed = ctx.state.sliceDoc(word.from, word.to)
+  const def = fence.lang && hljs.getLanguage(fence.lang)
+  const upper = def && def.case_insensitive && /^[A-Z]+$/.test(typed)
+  for (const [label, type] of keywordsFor(fence.lang)) push({ label: upper ? label.toUpperCase() : label, type, boost: -1 })
+  const end = ctx.state.doc.lineAt(ctx.pos)
+  const after = /^[\w$]*/.exec(end.text.slice(ctx.pos - end.from))[0].length
+  for (const label of codeWords(ctx.state, word.from, ctx.pos + after)) push({ label, type: 'text', boost: -2 })
+  return options.length ? { from: word.from, options, validFor: /^[\w$@#-]*$/ } : null
 }
 
 // ---------- Floating toolbar (shown while text is selected) ----------
@@ -710,14 +830,14 @@ function extensions(readOnly) {
     indentUnit.of('    '),
     EditorState.tabSize.of(4),
     tbC.of(opts.toolbar ? selToolbar : []),
-    autocompletion({ override: [slashSource, linkSource, langSource, emojiSource], icons: false }),
+    autocompletion({ override: [prose(slashSource), prose(linkSource), langSource, prose(emojiSource), codeSource], icons: false }),
     ghostField,
     ghostKeys,
     editorKeys,
-    markdown({ base: markdownLanguage, codeLanguages: languages }),
+    markdown({ base: markdownLanguage, codeLanguages }),
     syntaxHighlighting(mdStyle),
     syntaxHighlighting(classHighlighter),
-    keymap.of([indentWithTab, ...defaultKeymap.filter((k) => k.key !== 'Mod-/'), ...historyKeymap, ...searchKeymap]),
+    keymap.of([{ key: 'Tab', run: tabKey, shift: indentLess }, ...defaultKeymap.filter((k) => k.key !== 'Mod-/'), ...historyKeymap, ...searchKeymap]),
     EditorView.updateListener.of(onUpdate),
     EditorView.domEventHandlers({
       paste(e) {
